@@ -1,81 +1,187 @@
-import '@nomiclabs/hardhat-waffle'
-import '@typechain/hardhat'
-import { HardhatUserConfig, task } from 'hardhat/config'
-import 'hardhat-deploy'
-import '@nomiclabs/hardhat-etherscan'
+// import '@nomiclabs/hardhat-waffle'
+// import '@typechain/hardhat'
+// import { HardhatUserConfig, task } from 'hardhat/config'
+// import 'hardhat-deploy'
+// import '@nomiclabs/hardhat-etherscan'
 
-import 'solidity-coverage'
+// import 'solidity-coverage'
 
-import * as fs from 'fs'
+// import * as fs from 'fs'
 
-const SALT = '0x90d8084deab30c2a37c45e8d47f49f2f7965183cb6990a98943ef94940681de3'
-process.env.SALT = process.env.SALT ?? SALT
+// const SALT = '0x90d8084deab30c2a37c45e8d47f49f2f7965183cb6990a98943ef94940681de3'
+// process.env.SALT = process.env.SALT ?? SALT
 
-task('deploy', 'Deploy contracts')
-  .addFlag('simpleAccountFactory', 'deploy sample factory (by default, enabled only on localhost)')
+// task('deploy', 'Deploy contracts')
+//   .addFlag('simpleAccountFactory', 'deploy sample factory (by default, enabled only on localhost)')
 
-const mnemonicFileName = process.env.MNEMONIC_FILE!
-let mnemonic = 'test '.repeat(11) + 'junk'
-if (fs.existsSync(mnemonicFileName)) { mnemonic = fs.readFileSync(mnemonicFileName, 'ascii') }
+// const mnemonicFileName = process.env.MNEMONIC_FILE!
+// let mnemonic = 'test '.repeat(11) + 'junk'
+// if (fs.existsSync(mnemonicFileName)) { mnemonic = fs.readFileSync(mnemonicFileName, 'ascii') }
 
-function getNetwork1 (url: string): { url: string, accounts: { mnemonic: string } } {
-  return {
-    url,
-    accounts: { mnemonic }
-  }
-}
+// function getNetwork1 (url: string): { url: string, accounts: { mnemonic: string } } {
+//   return {
+//     url,
+//     accounts: { mnemonic }
+//   }
+// }
 
-function getNetwork (name: string): { url: string, accounts: { mnemonic: string } } {
-  return getNetwork1(`https://${name}.infura.io/v3/${process.env.INFURA_ID}`)
-  // return getNetwork1(`wss://${name}.infura.io/ws/v3/${process.env.INFURA_ID}`)
-}
+// function getNetwork (name: string): { url: string, accounts: { mnemonic: string } } {
+//   return getNetwork1(`https://${name}.infura.io/v3/${process.env.INFURA_ID}`)
+//   // return getNetwork1(`wss://${name}.infura.io/ws/v3/${process.env.INFURA_ID}`)
+// }
 
-const optimizedComilerSettings = {
-  version: '0.8.23',
-  settings: {
-    optimizer: { enabled: true, runs: 1000000 },
-    viaIR: true
-  }
-}
+// const optimizedComilerSettings = {
+//   version: '0.8.23',
+//   settings: {
+//     optimizer: { enabled: true, runs: 1000000 },
+//     viaIR: true
+//   }
+// }
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+// // You need to export an object to set up your config
+// // Go to https://hardhat.org/config/ to learn more
 
-const config: HardhatUserConfig = {
+// const config: HardhatUserConfig = {
+//   solidity: {
+//     compilers: [{
+//       version: '0.8.23',
+//       settings: {
+//         optimizer: { enabled: true, runs: 1000000 }
+//       }
+//     }],
+//     overrides: {
+//       'contracts/core/EntryPoint.sol': optimizedComilerSettings,
+//       'contracts/samples/SimpleAccount.sol': optimizedComilerSettings
+//     }
+//   },
+//   networks: {
+//     dev: { url: 'http://localhost:8545' },
+//     // github action starts localgeth service, for gas calculations
+//     localgeth: { url: 'http://localgeth:8545' },
+//     goerli: getNetwork('goerli'),
+//     sepolia: getNetwork('sepolia'),
+//     proxy: getNetwork1('http://localhost:8545')
+//   },
+//   mocha: {
+//     timeout: 10000
+//   },
+//   // @ts-ignore
+//   etherscan: {
+//     apiKey: process.env.ETHERSCAN_API_KEY
+//   }
+
+// }
+
+// // coverage chokes on the "compilers" settings
+// if (process.env.COVERAGE != null) {
+//   // @ts-ignore
+//   config.solidity = config.solidity.compilers[0]
+// }
+
+// export default config
+
+require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
+
+// Load environment variables
+const PRIVATE_KEY =
+  process.env.PRIVATE_KEY ||
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
+console.log("PRIVATE_KEY", PRIVATE_KEY);
+/** @type import('hardhat/config').HardhatUserConfig */
+module.exports = {
   solidity: {
-    compilers: [{
-      version: '0.8.23',
-      settings: {
-        optimizer: { enabled: true, runs: 1000000 }
-      }
-    }],
-    overrides: {
-      'contracts/core/EntryPoint.sol': optimizedComilerSettings,
-      'contracts/samples/SimpleAccount.sol': optimizedComilerSettings
-    }
+    version: "0.8.23",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+      viaIR: true,
+    },
   },
   networks: {
-    dev: { url: 'http://localhost:8545' },
-    // github action starts localgeth service, for gas calculations
-    localgeth: { url: 'http://localgeth:8545' },
-    goerli: getNetwork('goerli'),
-    sepolia: getNetwork('sepolia'),
-    proxy: getNetwork1('http://localhost:8545')
+    baseSepolia: {
+      url: "https://sepolia.base.org",
+      accounts: [PRIVATE_KEY],
+      chainId: 84532,
+    },
+    arbitrumSepolia: {
+      url: "https://arbitrum-sepolia.drpc.org",
+      accounts: [PRIVATE_KEY],
+      chainId: 421614,
+    },
+    optimismSepolia: {
+      url: "https://sepolia.optimism.io",
+      accounts: [PRIVATE_KEY],
+      chainId: 11155420,
+    },
+    sepolia: {
+      url: "https://1rpc.io/sepolia",
+      accounts: [PRIVATE_KEY],
+      chainId: 11155111,
+    },
+    worldchainSepolia: {
+      url: "https://worldchain-sepolia.g.alchemy.com/public",
+      accounts: [PRIVATE_KEY],
+      chainId: 4801,
+    },
   },
-  mocha: {
-    timeout: 10000
-  },
-  // @ts-ignore
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
-  }
-
-}
-
-// coverage chokes on the "compilers" settings
-if (process.env.COVERAGE != null) {
-  // @ts-ignore
-  config.solidity = config.solidity.compilers[0]
-}
-
-export default config
+    apiKey: {
+      baseSepolia: process.env.BASESCAN_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
+      arbitrumSepolia: process.env.ARBISCAN_API_KEY,
+      optimismSepolia: process.env.OPSCAN_API_KEY,
+      worldchainSepolia: process.env.WORLDSCAN_API_KEY,
+    },
+    customChains: [
+      {
+        network: "baseSepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "http://sepolia.basescan.org",
+        },
+      },
+      {
+        network: "sepolia",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://api-sepolia.etherscan.io/api",
+          browserURL: "https://sepolia.etherscan.io",
+        },
+      },
+      {
+        network: "arbitrumSepolia",
+        chainId: 421614,
+        urls: {
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia.arbiscan.io",
+        },
+      },
+      {
+        network: "optimismSepolia",
+        chainId: 11155420,
+        urls: {
+          apiURL: "https://api-sepolia.optimistic.etherscan.io/api",
+          browserURL: "https://sepolia.optimistic.etherscan.io",
+        },
+      },
+      {
+        network: "worldchainSepolia",
+        chainId: 4801,
+        urls: {
+          apiURL: "https://api-sepolia.worldscan.org/api",
+          browserURL: "https://sepolia.worldscan.org",
+        },
+      },
+    ],
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+  },
+};
