@@ -16,19 +16,29 @@ import "./UserOperationLib.sol";
 abstract contract BasePaymaster is IPaymaster, Ownable {
     IEntryPoint public immutable entryPoint;
 
-    uint256 internal constant PAYMASTER_VALIDATION_GAS_OFFSET = UserOperationLib.PAYMASTER_VALIDATION_GAS_OFFSET;
-    uint256 internal constant PAYMASTER_POSTOP_GAS_OFFSET = UserOperationLib.PAYMASTER_POSTOP_GAS_OFFSET;
-    uint256 internal constant PAYMASTER_DATA_OFFSET = UserOperationLib.PAYMASTER_DATA_OFFSET;
+    uint256 internal constant PAYMASTER_VALIDATION_GAS_OFFSET =
+        UserOperationLib.PAYMASTER_VALIDATION_GAS_OFFSET;
+    uint256 internal constant PAYMASTER_POSTOP_GAS_OFFSET =
+        UserOperationLib.PAYMASTER_POSTOP_GAS_OFFSET;
+    uint256 internal constant PAYMASTER_DATA_OFFSET =
+        UserOperationLib.PAYMASTER_DATA_OFFSET;
 
-    constructor(IEntryPoint _entryPoint) Ownable(msg.sender) {
+    constructor(IEntryPoint _entryPoint) {
         _validateEntryPointInterface(_entryPoint);
         entryPoint = _entryPoint;
     }
 
     //sanity check: make sure this EntryPoint was compiled against the same
     // IEntryPoint of this paymaster
-    function _validateEntryPointInterface(IEntryPoint _entryPoint) internal virtual {
-        require(IERC165(address(_entryPoint)).supportsInterface(type(IEntryPoint).interfaceId), "IEntryPoint interface mismatch");
+    function _validateEntryPointInterface(
+        IEntryPoint _entryPoint
+    ) internal virtual {
+        require(
+            IERC165(address(_entryPoint)).supportsInterface(
+                type(IEntryPoint).interfaceId
+            ),
+            "IEntryPoint interface mismatch"
+        );
     }
 
     /// @inheritdoc IPaymaster
