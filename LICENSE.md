@@ -1,4 +1,5 @@
-Custom License Agreement
+## Custom License Agreement
+
 Copyright (c) Gabriel Antony Xaviour
 
 Permission is hereby granted to any person obtaining a copy of this software and associated documentation files (the “Software”) to use, modify, and distribute the Software, subject to the following conditions:
