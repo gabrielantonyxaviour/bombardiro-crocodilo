@@ -3,8 +3,10 @@ import "./globals.css"
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import BottomNavigation from "@/components/navigation/bottom-navigation"
 import { ThemeProvider } from "@/components/theme-provider"
+import MiniKitProvider from "@/components/minikit-provider"
+import { RootLayoutContent } from "@/components/root-layout"
+import { Toaster } from "@/components/ui/sonner"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,13 +24,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <div className="max-h-screen overflow-hidden sen">
-            {children}
-            <BottomNavigation />
-          </div>
+          <MiniKitProvider>
+            <RootLayoutContent>
+              {children}
+            </RootLayoutContent>
+            <Toaster position="top-center" />
+          </MiniKitProvider>
         </ThemeProvider>
       </body>
     </html>
   )
 }
-
