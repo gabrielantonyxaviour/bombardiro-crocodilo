@@ -9,35 +9,30 @@ import { Button } from "./ui/button";
 import { use, useEffect, useState } from "react";
 import { WORLD_TESTING_ABI } from "@/lib/constants";
 import { decodeAbiParameters } from "viem";
+import { useEnvironmentStore } from "./providers/context";
 
 export async function VerifyWorldId() {
   const [verified, setVerified] = useState(false);
-  const [signal, setSignal] = useState<string>("");
-
-  useEffect(() => {
-    console.log("MiniKit is installed", MiniKit.isInstalled());
-    if (MiniKit.isInstalled()) {
-      const signal = MiniKit.user?.walletAddress;
-      if (signal) {
-        setSignal(signal);
-      }
-    }
-  }, [MiniKit.user]);
-
-  const verifyPayload: VerifyCommandInput = {
-    action: "onboarding",
-    verification_level: VerificationLevel.Orb,
-  };
+  const { worldAddress } = useEnvironmentStore((store) => store);
 
   const handleVerify = async () => {
+    if (!worldAddress) {
+      console.error("World address is not set");
+      return;
+    }
     if (!MiniKit.isInstalled()) {
       console.error("MiniKit is not installed");
       return;
     }
     console.log("Verifying World ID");
+
+    const verifyPayload: VerifyCommandInput = {
+      action: "onboarding",
+      verification_level: VerificationLevel.Orb,
+    };
     const { finalPayload } = await MiniKit.commandsAsync.verify({
       ...verifyPayload,
-      signal,
+      signal: worldAddress,
     });
     if (finalPayload.status === "error") {
       return console.log("Error payload", finalPayload);
@@ -52,7 +47,16 @@ export async function VerifyWorldId() {
       body: JSON.stringify({
         payload: finalPayload as ISuccessResult, // Parses only the fields we need to verify
         action: "onboarding",
-        signal, // This is the signal we passed in the verify command
+        signal: worldAddress,
+        params: [
+          worldAddress,
+          finalPayload.merkle_root,
+          finalPayload.nullifier_hash,
+          decodeAbiParameters(
+            [{ type: "uint256[8]" }],
+            finalPayload.proof as `0x${string}`
+          )[0].map((x) => x.toString()),
+        ],
       }),
     });
 
@@ -64,7 +68,7 @@ export async function VerifyWorldId() {
             abi: WORLD_TESTING_ABI,
             functionName: "verifyAndExecute",
             args: [
-              signal,
+              worldAddress,
               finalPayload.merkle_root,
               finalPayload.nullifier_hash,
               decodeAbiParameters(
@@ -81,7 +85,7 @@ export async function VerifyWorldId() {
   };
 
   return !verified ? (
-    <Button onClick={handleVerify}>{MiniKit.user?.walletAddress}</Button>
+    <Button onClick={handleVerify}>Verify World ID</Button>
   ) : (
     <p>Verified!</p>
   );

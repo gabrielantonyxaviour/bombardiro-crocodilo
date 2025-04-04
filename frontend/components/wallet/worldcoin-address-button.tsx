@@ -1,33 +1,46 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Copy, Check, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import Image from "next/image"
-import { MiniKit } from "@worldcoin/minikit-js"
+import { useState } from "react";
+import { Copy, Check, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Image from "next/image";
+import { MiniKit } from "@worldcoin/minikit-js";
+import { useEnvironmentStore } from "../providers/context";
 
 export default function WorldcoinAddressButton() {
-  const [copied, setCopied] = useState(false)
-  const worldchainAddress = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
-  const username = "worlduser_123"
-  const isVerified = false // Set to true or false based on verification status
+  const [copied, setCopied] = useState(false);
+  const { worldAddress } = useEnvironmentStore((store) => store);
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const formatAddress = (address: string) => {
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
-  }
+    return `${address.substring(0, 6)}...${address.substring(
+      address.length - 4
+    )}`;
+  };
 
   return (
     <Dialog>
       <DialogTrigger asChild className="sen">
         <Button variant="outline" size="icon" className="rounded-full">
-          <Image src="/chains/world.png" width={24} height={24} alt="Worldchain" className="rounded-full" />
+          <Image
+            src="/chains/world.png"
+            width={24}
+            height={24}
+            alt="Worldchain"
+            className="rounded-full"
+          />
         </Button>
       </DialogTrigger>
       <DialogContent className="sen border-border">
@@ -37,21 +50,31 @@ export default function WorldcoinAddressButton() {
 
         {/* Username Section */}
         <div className="flex flex-col space-y-3">
-          {MiniKit.user?.profilePictureUrl && <div className="flex flex-col space-y-1">
-            <Image src={MiniKit.user?.profilePictureUrl} width={24} height={24} alt="Worldchain" className="rounded-full" />
-          </div>}
+          {MiniKit.user?.profilePictureUrl && (
+            <div className="flex flex-col space-y-1">
+              <Image
+                src={MiniKit.user?.profilePictureUrl}
+                width={24}
+                height={24}
+                alt="Worldchain"
+                className="rounded-full"
+              />
+            </div>
+          )}
           <div className="flex flex-col space-y-1 ">
             <div className="flex justify-between items-center ">
               <span className="text-sm text-muted-foreground">Username</span>
             </div>
-            <p className="text-sm sen text-foreground ">{MiniKit.user?.username || "N/A"}</p>
+            <p className="text-sm sen text-foreground ">
+              {MiniKit.user?.username || "N/A"}
+            </p>
           </div>
 
           <div className="flex flex-col space-y-1">
             <div className="flex space-x-1 items-center">
               <span className="text-sm text-muted-foreground">Address</span>
               <Button
-                onClick={() => copyToClipboard(MiniKit.user?.walletAddress || "")}
+                onClick={() => copyToClipboard(worldAddress || "")}
                 variant="ghost"
                 size="sm"
                 className="h-2 text-xs"
@@ -67,26 +90,31 @@ export default function WorldcoinAddressButton() {
                 )}
               </Button>
             </div>
-            <p className="text-sm sen text-foreground break-all ">{MiniKit.user?.walletAddress || ""}</p>
-
+            <p className="text-sm sen text-foreground break-all ">
+              {worldAddress || ""}
+            </p>
           </div>
 
           <div className="flex flex-col space-y-1">
             <div className="flex justify-between items-center ">
-              <span className="text-sm text-muted-foreground">Orb Verification</span>
+              <span className="text-sm text-muted-foreground">
+                Orb Verification
+              </span>
             </div>
             <div className="flex items-center">
-              <Shield size={16} className={`mr-2 ${MiniKit.user?.username ? "text-green-500" : "text-red-500"}`} />
+              <Shield
+                size={16}
+                className={`mr-2 ${
+                  MiniKit.user?.username ? "text-green-500" : "text-red-500"
+                }`}
+              />
               <p className="text-sm sen text-foreground">
                 {MiniKit.user?.username ? "Verified" : "Not Verified"}
               </p>
             </div>
           </div>
         </div>
-
-
-
       </DialogContent>
     </Dialog>
-  )
+  );
 }

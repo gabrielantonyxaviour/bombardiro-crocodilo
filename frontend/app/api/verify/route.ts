@@ -9,18 +9,20 @@ interface IRequestPayload {
   payload: ISuccessResult;
   action: string;
   signal: string | undefined;
+  params: any;
 }
 
 export async function POST(req: NextRequest) {
-  const { payload, action, signal } = (await req.json()) as IRequestPayload;
+  const { payload, action, signal, params } =
+    (await req.json()) as IRequestPayload;
   const app_id = process.env.APP_ID as `app_${string}`;
-  console.log("Verifying World ID");
   console.log("Signal", signal);
   console.log({
     app_id,
     payload,
     action,
     signal,
+    params,
   });
   return NextResponse.json({
     success: {
