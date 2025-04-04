@@ -42,11 +42,7 @@ interface IEntryPointSimulations is IEntryPoint {
      */
     function simulateValidation(
         PackedUserOperation calldata userOp
-    )
-    external
-    returns (
-        ValidationResult memory
-    );
+    ) external returns (ValidationResult memory);
 
     /**
      * Simulate full execution of a UserOperation (including both validation and target execution)
@@ -65,9 +61,5 @@ interface IEntryPointSimulations is IEntryPoint {
         PackedUserOperation calldata op,
         address target,
         bytes calldata targetCallData
-    )
-    external
-    returns (
-        ExecutionResult memory
-    );
+    ) external returns (ExecutionResult memory);
 }

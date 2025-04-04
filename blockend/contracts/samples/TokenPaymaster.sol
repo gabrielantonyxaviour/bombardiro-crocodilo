@@ -24,26 +24,27 @@ import "./utils/OracleHelper.sol";
 /// The contract uses an Oracle to fetch the latest token prices.
 /// @dev Inherits from BasePaymaster.
 contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
-
     using UserOperationLib for PackedUserOperation;
 
     struct TokenPaymasterConfig {
         /// @notice The price markup percentage applied to the token price (1e26 = 100%). Ranges from 1e26 to 2e26
         uint256 priceMarkup;
-
         /// @notice Exchange tokens to native currency if the EntryPoint balance of this Paymaster falls below this value
         uint128 minEntryPointBalance;
-
         /// @notice Estimated gas cost for refunding tokens after the transaction is completed
         uint48 refundPostopCost;
-
         /// @notice Transactions are only valid as long as the cached price is not older than this value
         uint48 priceMaxAge;
     }
 
     event ConfigUpdated(TokenPaymasterConfig tokenPaymasterConfig);
 
-    event UserOperationSponsored(address indexed user, uint256 actualTokenCharge, uint256 actualGasCost, uint256 actualTokenPriceWithMarkup);
+    event UserOperationSponsored(
+        address indexed user,
+        uint256 actualTokenCharge,
+        uint256 actualGasCost,
+        uint256 actualTokenPriceWithMarkup
+    );
 
     event Received(address indexed sender, uint256 value);
 
@@ -71,18 +72,9 @@ contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
         UniswapHelperConfig memory _uniswapHelperConfig,
         address _owner
     )
-    BasePaymaster(
-    _entryPoint
-    )
-    OracleHelper(
-    _oracleHelperConfig
-    )
-    UniswapHelper(
-    _token,
-    _wrappedNative,
-    _uniswap,
-    _uniswapHelperConfig
-    )
+        BasePaymaster(_entryPoint)
+        OracleHelper(_oracleHelperConfig)
+        UniswapHelper(_token, _wrappedNative, _uniswap, _uniswapHelperConfig)
     {
         setTokenPaymasterConfig(_tokenPaymasterConfig);
         transferOwnership(_owner);
@@ -93,8 +85,14 @@ contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     function setTokenPaymasterConfig(
         TokenPaymasterConfig memory _tokenPaymasterConfig
     ) public onlyOwner {
-        require(_tokenPaymasterConfig.priceMarkup <= 2 * PRICE_DENOMINATOR, "TPM: price markup too high");
-        require(_tokenPaymasterConfig.priceMarkup >= PRICE_DENOMINATOR, "TPM: price markup too low");
+        require(
+            _tokenPaymasterConfig.priceMarkup <= 2 * PRICE_DENOMINATOR,
+            "TPM: price markup too high"
+        );
+        require(
+            _tokenPaymasterConfig.priceMarkup >= PRICE_DENOMINATOR,
+            "TPM: price markup too low"
+        );
         tokenPaymasterConfig = _tokenPaymasterConfig;
         emit ConfigUpdated(_tokenPaymasterConfig);
     }
@@ -117,30 +115,57 @@ contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     /// @param requiredPreFund The maximum cost (in native token) the paymaster has to prefund.
     /// @return context The context containing the token amount and user sender address (if applicable).
     /// @return validationResult A uint256 value indicating the result of the validation (always 0 in this implementation).
-    function _validatePaymasterUserOp(PackedUserOperation calldata userOp, bytes32, uint256 requiredPreFund)
-    internal
-    override
-    returns (bytes memory context, uint256 validationResult) {unchecked {
+    function _validatePaymasterUserOp(
+        PackedUserOperation calldata userOp,
+        bytes32,
+        uint256 requiredPreFund
+    )
+        internal
+        override
+        returns (bytes memory context, uint256 validationResult)
+    {
+        unchecked {
             uint256 priceMarkup = tokenPaymasterConfig.priceMarkup;
-            uint256 dataLength = userOp.paymasterAndData.length - PAYMASTER_DATA_OFFSET;
-            require(dataLength == 0 || dataLength == 32,
+            uint256 dataLength = userOp.paymasterAndData.length -
+                PAYMASTER_DATA_OFFSET;
+            require(
+                dataLength == 0 || dataLength == 32,
                 "TPM: invalid data length"
             );
             uint256 maxFeePerGas = userOp.unpackMaxFeePerGas();
             uint256 refundPostopCost = tokenPaymasterConfig.refundPostopCost;
-            require(refundPostopCost < userOp.unpackPostOpGasLimit(), "TPM: postOpGasLimit too low");
-            uint256 preChargeNative = requiredPreFund + (refundPostopCost * maxFeePerGas);
-        // note: as price is in native-asset-per-token and we want more tokens increasing it means dividing it by markup
-            uint256 cachedPriceWithMarkup = cachedPrice * PRICE_DENOMINATOR / priceMarkup;
+            require(
+                refundPostopCost < userOp.unpackPostOpGasLimit(),
+                "TPM: postOpGasLimit too low"
+            );
+            uint256 preChargeNative = requiredPreFund +
+                (refundPostopCost * maxFeePerGas);
+            // note: as price is in native-asset-per-token and we want more tokens increasing it means dividing it by markup
+            uint256 cachedPriceWithMarkup = (cachedPrice * PRICE_DENOMINATOR) /
+                priceMarkup;
             if (dataLength == 32) {
-                uint256 clientSuppliedPrice = uint256(bytes32(userOp.paymasterAndData[PAYMASTER_DATA_OFFSET : PAYMASTER_DATA_OFFSET + 32]));
+                uint256 clientSuppliedPrice = uint256(
+                    bytes32(
+                        userOp
+                            .paymasterAndData[PAYMASTER_DATA_OFFSET:PAYMASTER_DATA_OFFSET +
+                            32]
+                    )
+                );
                 if (clientSuppliedPrice < cachedPriceWithMarkup) {
                     // note: smaller number means 'more native asset per token'
                     cachedPriceWithMarkup = clientSuppliedPrice;
                 }
             }
-            uint256 tokenAmount = weiToToken(preChargeNative, cachedPriceWithMarkup);
-            SafeERC20.safeTransferFrom(token, userOp.sender, address(this), tokenAmount);
+            uint256 tokenAmount = weiToToken(
+                preChargeNative,
+                cachedPriceWithMarkup
+            );
+            SafeERC20.safeTransferFrom(
+                token,
+                userOp.sender,
+                address(this),
+                tokenAmount
+            );
             context = abi.encode(tokenAmount, userOp.sender);
             validationResult = _packValidationData(
                 false,
@@ -157,19 +182,30 @@ contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     /// @param actualUserOpFeePerGas - the gas price this UserOp pays. This value is based on the UserOp's maxFeePerGas
     //      and maxPriorityFee (and basefee)
     //      It is not the same as tx.gasprice, which is what the bundler pays.
-    function _postOp(PostOpMode, bytes calldata context, uint256 actualGasCost, uint256 actualUserOpFeePerGas) internal override {
+    function _postOp(
+        PostOpMode,
+        bytes calldata context,
+        uint256 actualGasCost,
+        uint256 actualUserOpFeePerGas
+    ) internal override {
         unchecked {
             uint256 priceMarkup = tokenPaymasterConfig.priceMarkup;
-            (
-                uint256 preCharge,
-                address userOpSender
-            ) = abi.decode(context, (uint256, address));
+            (uint256 preCharge, address userOpSender) = abi.decode(
+                context,
+                (uint256, address)
+            );
             uint256 _cachedPrice = updateCachedPrice(false);
-        // note: as price is in native-asset-per-token and we want more tokens increasing it means dividing it by markup
-            uint256 cachedPriceWithMarkup = _cachedPrice * PRICE_DENOMINATOR / priceMarkup;
-        // Refund tokens based on actual gas cost
-            uint256 actualChargeNative = actualGasCost + tokenPaymasterConfig.refundPostopCost * actualUserOpFeePerGas;
-            uint256 actualTokenNeeded = weiToToken(actualChargeNative, cachedPriceWithMarkup);
+            // note: as price is in native-asset-per-token and we want more tokens increasing it means dividing it by markup
+            uint256 cachedPriceWithMarkup = (_cachedPrice * PRICE_DENOMINATOR) /
+                priceMarkup;
+            // Refund tokens based on actual gas cost
+            uint256 actualChargeNative = actualGasCost +
+                tokenPaymasterConfig.refundPostopCost *
+                actualUserOpFeePerGas;
+            uint256 actualTokenNeeded = weiToToken(
+                actualChargeNative,
+                cachedPriceWithMarkup
+            );
             if (preCharge > actualTokenNeeded) {
                 // If the initially provided token amount is greater than the actual amount needed, refund the difference
                 SafeERC20.safeTransfer(
@@ -188,7 +224,12 @@ contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
                 );
             }
 
-            emit UserOperationSponsored(userOpSender, actualTokenNeeded, actualGasCost, cachedPriceWithMarkup);
+            emit UserOperationSponsored(
+                userOpSender,
+                actualTokenNeeded,
+                actualGasCost,
+                cachedPriceWithMarkup
+            );
             refillEntryPointDeposit(_cachedPrice);
         }
     }
@@ -210,8 +251,11 @@ contract TokenPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
         emit Received(msg.sender, msg.value);
     }
 
-    function withdrawEth(address payable recipient, uint256 amount) external onlyOwner {
-        (bool success,) = recipient.call{value: amount}("");
+    function withdrawEth(
+        address payable recipient,
+        uint256 amount
+    ) external onlyOwner {
+        (bool success, ) = recipient.call{value: amount}("");
         require(success, "withdraw failed");
     }
 }

@@ -12,29 +12,40 @@ import "../samples/SimpleAccount.sol";
  * the aggregated signature is the SUM of the nonce fields..
  */
 contract TestSignatureAggregator is IAggregator {
-
     /// @inheritdoc IAggregator
-    function validateSignatures(PackedUserOperation[] calldata userOps, bytes calldata signature) external pure override {
+    function validateSignatures(
+        PackedUserOperation[] calldata userOps,
+        bytes calldata signature
+    ) external pure override {
         uint256 sum = 0;
         for (uint256 i = 0; i < userOps.length; i++) {
             uint256 nonce = userOps[i].nonce;
             sum += nonce;
         }
-        require(signature.length == 32, "TestSignatureValidator: sig must be uint256");
-        (uint256 sig) = abi.decode(signature, (uint256));
-        require(sig == sum, "TestSignatureValidator: aggregated signature mismatch (nonce sum)");
+        require(
+            signature.length == 32,
+            "TestSignatureValidator: sig must be uint256"
+        );
+        uint256 sig = abi.decode(signature, (uint256));
+        require(
+            sig == sum,
+            "TestSignatureValidator: aggregated signature mismatch (nonce sum)"
+        );
     }
 
     /// @inheritdoc IAggregator
-    function validateUserOpSignature(PackedUserOperation calldata)
-    external pure returns (bytes memory) {
+    function validateUserOpSignature(
+        PackedUserOperation calldata
+    ) external pure returns (bytes memory) {
         return "";
     }
 
     /**
      * dummy test aggregator: sum all nonce values of UserOps.
      */
-    function aggregateSignatures(PackedUserOperation[] calldata userOps) external pure returns (bytes memory aggregatedSignature) {
+    function aggregateSignatures(
+        PackedUserOperation[] calldata userOps
+    ) external pure returns (bytes memory aggregatedSignature) {
         uint256 sum = 0;
         for (uint256 i = 0; i < userOps.length; i++) {
             sum += userOps[i].nonce;
