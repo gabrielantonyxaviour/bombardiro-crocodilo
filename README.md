@@ -1,5 +1,20 @@
 # Bombardiro Crocodilo
 
+
+![hq720](https://github.com/user-attachments/assets/f3bc02bc-7100-40c8-b2d4-b399c90fd305)
+
+## Description
+
+This Mini App allows World ID–verified users to interact with over 140 blockchains in a simple, unified interface. The app supports secure, cross-chain transactions and provides real-time multi-chain data, such as balances and transaction histories, all while delivering a smooth and responsive user experience. It simplifies cross-chain interactions by enabling users to manage their assets and perform actions across multiple networks with ease—without the need for separate verification on each chain.
+
+## How it's made
+
+The app is built on **WorldChain Sepolia** and leverages **Hyperlane Interchain Accounts (ICA)** and the **Open Intents framework** to facilitate seamless cross-chain transactions. World ID–verified users have identity-linked smart accounts that allow them to interact with multiple blockchains through a single interface, streamlining the cross-chain process.
+
+For real-time data management, I integrated **Nodit’s Web3 Data API**, **Elastic Nodes**, **Webhooks**, and **Streams**. These technologies allow for the efficient indexing of multi-chain data—such as balances and transaction history—ensuring that users can access this information instantly and without delay. The use of **Elastic Nodes** helps to handle complex queries, while **Webhooks** and **Streams** ensure that data updates happen in real-time, providing a highly dynamic and responsive user experience.
+
+By combining **Hyperlane’s** cross-chain messaging, **Open Intents’** secure transaction execution, and **Nodit’s** powerful data indexing tools, the Mini App offers a robust, scalable solution for cross-chain interactions. This technology stack allows the app to deliver live, fast data access across multiple blockchains, making it simple for users to manage their assets and perform transactions in a seamless, unified interface.
+
 ## Sponsors
 
 ### WorldChain
