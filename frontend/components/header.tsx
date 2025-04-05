@@ -19,15 +19,11 @@ export default function Header() {
               className="rounded-full"
             />
           </div>
-          <h1 className="text-xl font-bold text-foreground">World-7683</h1>
+          <h1 className="text-xl font-bold text-foreground">
+            Bombardiro Crocodilo
+          </h1>
         </div>
         <div className="flex items-center space-x-2">
-          <Button
-            className="text-sm text-foreground hover:text-primary focus:outline-none"
-            onClick={() => (window as any).toggleEruda()}
-          >
-            <Settings className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          </Button>
           <ThemeToggle />
           <WorldcoinAddressButton />
         </div>
