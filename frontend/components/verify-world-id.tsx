@@ -59,7 +59,25 @@ export async function VerifyWorldId() {
         ],
       }),
     });
-
+    console.log("Transaction Payload");
+    console.log({
+      transaction: [
+        {
+          address: "0xFab019C029e08B51c1A1661007dbeCfe23065c71",
+          abi: WORLD_TESTING_ABI,
+          functionName: "verifyAndExecute",
+          args: [
+            worldAddress,
+            finalPayload.merkle_root,
+            finalPayload.nullifier_hash,
+            decodeAbiParameters(
+              [{ type: "uint256[8]" }],
+              finalPayload.proof as `0x${string}`
+            )[0],
+          ],
+        },
+      ],
+    });
     const { commandPayload, finalPayload: finalVerifyTxPayload } =
       await MiniKit.commandsAsync.sendTransaction({
         transaction: [
