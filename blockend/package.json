@@ -49,6 +49,7 @@
     "typechain": "^8.1.0"
   },
   "dependencies": {
+    "@ensdomains/ens-contracts": "^1.4.0",
     "@hyperlane-xyz/core": "^5.4.1",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
