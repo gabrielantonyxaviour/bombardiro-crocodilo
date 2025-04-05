@@ -14,7 +14,7 @@ async function main() {
   const network = hre.network.name;
   console.log(`Deploying to ${network}...`);
 
-  const worldId = "0x57f928158C3EE7CDad1e4D8642503c4D0201f611";
+  const worldId = "0x17B354dD2595411ff79041f930e491A4Df39A278";
   const appId = process.env.WORLD_APP_ID || "";
   const actionId = "onboarding";
 

@@ -126,6 +126,13 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       chainId: 4801,
     },
+    worldchain: {
+      url:
+        "https://worldchain-mainnet.g.alchemy.com/v2/" +
+        process.env.ALCHEMY_API_KEY,
+      accounts: [PRIVATE_KEY],
+      chainId: 480,
+    },
   },
   etherscan: {
     apiKey: {
@@ -134,6 +141,7 @@ module.exports = {
       arbitrumSepolia: process.env.ARBISCAN_API_KEY,
       optimismSepolia: process.env.OPSCAN_API_KEY,
       worldchainSepolia: process.env.WORLDSCAN_API_KEY,
+      worldchain: process.env.WORLDSCAN_API_KEY,
     },
     customChains: [
       {
@@ -174,6 +182,14 @@ module.exports = {
         urls: {
           apiURL: "https://api-sepolia.worldscan.org/api",
           browserURL: "https://sepolia.worldscan.org",
+        },
+      },
+      {
+        network: "worldchain",
+        chainId: 480,
+        urls: {
+          apiURL: "https://api.worldscan.org/api",
+          browserURL: "https://worldscan.org",
         },
       },
     ],

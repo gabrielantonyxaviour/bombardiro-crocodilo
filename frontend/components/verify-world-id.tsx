@@ -64,7 +64,7 @@ export async function VerifyWorldId() {
       await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
-            address: "0x5E8fbDE101292eeCd9317c32A6b960723100e4D8",
+            address: "0xFab019C029e08B51c1A1661007dbeCfe23065c71",
             abi: WORLD_TESTING_ABI,
             functionName: "verifyAndExecute",
             args: [

@@ -8,6 +8,7 @@ import MiniKitProvider from "@/components/providers/minikit-provider";
 import { RootLayoutContent } from "@/components/root-layout";
 import { Toaster } from "@/components/ui/sonner";
 import { EnvironmentStoreProvider } from "@/components/providers/context";
+import { ErudaProvider } from "@/components/providers/eruda";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,10 +27,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <EnvironmentStoreProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <MiniKitProvider>
-              <RootLayoutContent>{children}</RootLayoutContent>
-              <Toaster position="top-center" />
-            </MiniKitProvider>
+            <ErudaProvider>
+              <MiniKitProvider>
+                <RootLayoutContent>{children}</RootLayoutContent>
+                <Toaster position="top-center" />
+              </MiniKitProvider>
+            </ErudaProvider>
           </ThemeProvider>
         </EnvironmentStoreProvider>
       </body>
