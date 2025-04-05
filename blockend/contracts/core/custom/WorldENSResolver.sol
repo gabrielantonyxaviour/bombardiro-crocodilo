@@ -10,7 +10,7 @@ import {IL2Registrar} from "./interfaces/IL2Registrar.sol";
 import {IL2Registry} from "./interfaces/IL2Registry.sol";
 
 /// @dev This is an example registrar contract that is mean to be modified.
-contract FrankyENSRegistrar is IL2Registrar {
+contract WorldENSResolver is IL2Registrar {
     using StringUtils for string;
 
     using ByteHasher for bytes;
